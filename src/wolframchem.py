@@ -57,17 +57,16 @@ def pub_get_cids(parameters, parametername="Name", as_dataframe=False, remainfir
             resultdf =pd.DataFrame([])
             for i,name in enumerate(parameters):
                 if remainfirst:
-                    resultdf=resultdf.append(pd.DataFrame({parametername:name,"CompoundID": [result[0][i]["CompoundID"][0]]}))
+                    resultdf=resultdf.append(pd.DataFrame({parametername:name,"CompoundID": [result[0][i]["CompoundID"][0]]})).reset_index(drop=True)
                 else:
-                    resultdf=resultdf.append(pd.DataFrame({parametername:name,"CompoundID": result[0][i]["CompoundID"]}))
+                    resultdf=resultdf.append(pd.DataFrame({parametername:name,"CompoundID": result[0][i]["CompoundID"]})).reset_index(drop=True)
                 
             return resultdf
 
         if remainfirst:
             return [iter["CompoundID"][0] for iter in result[0]]
         else:
-            return [iter["CompoundID"] for iter in result[0]]
-        
+            return [iter["CompoundID"] for iter in result[0]]       
 def pub_get_compound_description():
     pass
 def pub_get_compound_description():
