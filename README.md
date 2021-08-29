@@ -23,7 +23,7 @@ wch.start_session("{wolframe engine path}",Pubchem=True)
 ```
 
 ```python
-wch.pub_get_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=True,remainfirst=False)
+wch.Pubchem.get_compound_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=True,remainfirst=False)
 ```
 output:
 
@@ -53,7 +53,7 @@ output:
 remainfirst True (default = False)
 
 ```python
-wch.pub_get_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=True,remainfirst=True)
+wch.Pubchem.get_compound_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=True,remainfirst=True)
 ```
 output:
 
@@ -66,7 +66,7 @@ output:
 as data frame False (default = False)
 
 ```python
-wch.pub_get_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=False,remainfirst=False)
+wch.Pubchem.get_compound_cids(["Ambroxol","CYANOCOBALAMIN"],as_dataframe=False,remainfirst=False)
 ```
 output:
 
