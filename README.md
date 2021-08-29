@@ -1,7 +1,16 @@
 # WolframChem
- Wolfram Chemical data base python warrper
+ Wolfram Chemical data base python warrper. This module provides chemical data searching function through Wolfram language service. It needs Wolfram engine and Wolfram Client Library for Python. 
 
+ Avaliable data source
 
+ * Pubchem
+ * Chemspider
+ * OpenPACTS
+ * Wolfram ChemicalData
+
+Using pandas, some functions provides option `as_datafram` for comfortable data processing. 
+
+If you want those database directly in `REST API` they provide. I recommend `pubchempy`, `ChemSpipy` and `O
 
 ## Get Pubchem `cids` with `names`
 
