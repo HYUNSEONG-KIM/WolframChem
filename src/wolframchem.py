@@ -30,60 +30,105 @@ def start_session(wolframpath=None, Pubchem=False, ChemSpider=False, OpenPHACTS=
 
 def end_session():
     session.terminate()
+    
+
 
 
 #Pubchem-----------------------------------------------------------------------------------------------------
+
+PubRequestAddprameter = {
+    "CompoundDescription" :["InterpretEntities"],
+    "CompoundSID":["SIDType"],
+    "CompoundAID":["AIDType"],
+    "CompoundCID":["CIDType"],
+    "CompoundProperties" :["Property"],
+    "CompoundCrossReferences": ["CrossReference"],
+    "CompoundImage" : ["ImageType",	"ImageSize"],
+    "CompoundFullRecords" : ["RecordType"],
+    "SubstanceSID":["SIDType"],
+    "SubstanceAID":["AIDType"],
+    "SubstanceCID":["CIDType"],
+    "SubstanceImage":["ImageSize"]
+}
+
+def _get_pubchem(request, parameters, parametername="Name", as_dataframe=False, Method=False, **kwargs):
+    
+    if request in ["CompoundImage","CompoundSDF"] or "Compound" != request:
+        Method = False
+    if parametername == "Formula" and Method != "FormulaSearch":
+            raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
+
+    if isinstance(parameters,str):
+            parameters = [parameters]
+            
+    searchdict = {parametername:parameters}
+
+    if isinstance(Method,str):
+            searchdict["Method"] = Method
+    if len(kwargs) != 0 and request in PubRequestAddprameter.keys():
+        
+        for i in kwargs.keys():
+            if kwargs[i]:
+                searchdict[i] = kwargs[i]
+
+
+    result = pubchem(request ,searchdict)
+    if as_dataframe:
+            paradf = pd.DataFrame.from_dict({parametername:parameters})
+            return paradf.join(pd.DataFrame.from_records(result[0])) 
+
+    return [dict(r) for r in result[0]]
+
+
 class Pubchem:
     def __init__(self):
         pass
     @classmethod
-    def get_compound_description(cls,parameters, parametername="Name", as_dataframe=False, Method=False, InterpretEntities = False):
-        if parametername == "Formula" and Method != "FormulaSearch":
-            raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
-
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-
-
-        result = pubchem("CompoundDescription" ,searchdict)
+    def get_compound_description(cls,
+                                 parameters, 
+                                 parametername="Name", 
+                                 as_dataframe=False, 
+                                 Method=False, 
+                                 InterpretEntities = False):
+        return _get_pubchem("CompoundDescription", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, InterpretEntities=InterpretEntities)
+    
     @classmethod
-    def get_compound_sids(cls,parameters, parametername="Name", as_dataframe=False, SIDType = False,  Method=False):
+    def get_compound_synonyms(cls,
+                              parameters, 
+                              parametername="Name", 
+                              as_dataframe=False, 
+                              Method=False):
+        return _get_pubchem("CompoundSynonyms", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method)
+    
+    @classmethod
+    def get_compound_sids(cls,
+                          parameters, 
+                          parametername="Name", 
+                          as_dataframe=False,  
+                          Method=False,
+                          SIDType = False):
         
-        if parametername == "Formula" and Method != "FormulaSearch":
-            raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
-        
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(SIDType,str):
-            searchdict["SIDType"] = SIDType
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
+        return _get_pubchem("CompoundSID" , parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, SIDType =SIDType )
 
     @classmethod
-    def get_compound_aids(cls,parameters, parametername="Name", as_dataframe=False, AIDType = False, Method=False):
+    def get_compound_aids(cls,
+                          parameters, 
+                          parametername="Name", 
+                          as_dataframe=False,  
+                          Method=False,
+                          AIDType = False):
         
-        if parametername == "Formula" and Method != "FormulaSearch":
-            raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(AIDType,str):
-            searchdict["AIDType"] = AIDType
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
+        return _get_pubchem("CompoundAID" , parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, AIDType =AIDType )
 
     @classmethod
-    def get_cids(cls,parameters, parametername="Name", as_dataframe=False, remainfirst=False, CIDType = False, Method=False):
-        
+    def get_compound_cids(cls,
+                          parameters, 
+                          parametername="Name", 
+                          as_dataframe=False, 
+                          remainfirst=False,  
+                          Method=False,
+                          CIDType = False):
+
         if parametername == "Formula" and Method != "FormulaSearch":
             raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
         if isinstance(parameters,str):
@@ -110,73 +155,33 @@ class Pubchem:
         if remainfirst:
             return [iter["CompoundID"][0] for iter in result[0]]
         else:
-            return [iter["CompoundID"] for iter in result[0]]      
+            return [iter["CompoundID"] for iter in result[0]]  
+
+        
     @classmethod
     def get_compound_properties(cls,parameters, parametername="Name", as_dataframe=False, Property = False, Method=False):
-        
-        if parametername == "Formula" and Method != "FormulaSearch":
-            raise ValueError("Formula only vaild for \"FormulaSearch\" method.")
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(Property, list):
-            searchdict["Property"] = Property
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
-    @classmethod
-    def get_compound_cross_references(cls,parameters, parametername="Name", as_dataframe=False, CrossReference=False, Method=False):
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(CrossReference, list):
-            searchdict["CrossReference"] = CrossReference
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
-    @classmethod
-    def get_compound_image(cls,parameters, parametername="Name", as_dataframe=False, ImageType="2D", ImageSize=, Method=False):
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
-    @classmethod
-    def get_compound_sdf(cls,parameters, parametername="Name", as_dataframe=False, Method=False):
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
-    @classmethod
-    def get_compounds(cls,parameters, parametername="Name", as_pcp_compound=False, as_dataframe=False, Method=False):
+        return _get_pubchem("CompoundProperties", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, Property=Property)
     
-        if isinstance(parameters,str):
-                parameters = [parameters]
-
-        searchdict = {parametername:parameters}
-
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-
-        fullrecord = pubchem("CompoundFullRecords")
-
-        return [Compound(r) for r in fullrecord[0]]
+    
+    @classmethod
+    def get_compound_cross_references(cls,parameters, parametername="Name", as_dataframe=False, CrossReference=False):
+        return _get_pubchem("CompoundCrossReferences" , parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, CrossReference=CrossReference)
+    
+    @classmethod
+    def get_compound_image(cls,parameters, parametername="Name", as_dataframe=False, ImageType="2D", ImageSize=True, Method=False):
+        return _get_pubchem("CompoundImage", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, ImageType=ImageType, ImageSize=ImageSize)
+    
+    @classmethod
+    def get_compound_sdf(cls,parameters, parametername="Name", as_dataframe=False):
+        return _get_pubchem("CompoundSDF", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe)
+    @classmethod
+    def get_compounds(cls,parameters, parametername="Name", as_dataframe=False,RecordType="2D",Method=False):
+    
+        return _get_pubchem("CompoundFullRecords", parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method, RecordType=RecordType)
+    
     @classmethod
     def get_compound_assay_summary(cls,parameters, parametername="Name", as_dataframe=False, Method=False):
-        if isinstance(parameters,str):
-            parameters = [parameters]
-        searchdict = {parametername:parameters}
-
-        if isinstance(Method,str):
-            searchdict["Method"] = Method
-        result = pubchem("CompoundDescription" ,searchdict)
+        return _get_pubchem("CompoundAssaySummary" , parameters = parameters, parametername=parametername, as_dataframe = as_dataframe, Method=Method)
 
 #ChemSpider-----------------------------------------------------------------------------------------------------
 
