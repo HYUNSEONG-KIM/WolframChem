@@ -10,7 +10,7 @@
 
 Using pandas, some functions provides option `as_datafram` for comfortable data processing. 
 
-If you want those database directly in `REST API` they provide. I recommend `pubchempy`, `ChemSpipy` and `O
+If you want to use those database directly with `REST API` they provide. I recommend `pubchempy`, `ChemSpipy` and `O
 
 ## Get Pubchem `cids` with `names`
 
